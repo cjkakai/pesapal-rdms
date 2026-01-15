@@ -39,14 +39,34 @@ class Table:
             index[row[col_name]] = row_id
     
     def filter_rows(self, col_name, value):
-    # Use index if exists
         if col_name in self.indexes:
             row_id = self.indexes[col_name].get(value)
             if row_id is not None:
                 return [self.rows[row_id]]
             return []
-    # fallback: scan all rows
         return [row for row in self.rows if row.get(col_name) == value]
+
+    def update_rows(self, set_col, set_val, where_col, where_val):
+        rows = self.filter_rows(where_col, where_val)
+        for row in rows:
+            old_val = row[set_col]
+            row[set_col] = set_val
+        # update indexes
+        if set_col in self.indexes:
+            idx = self.indexes[set_col]
+            del idx[old_val]
+            idx[set_val] = self.rows.index(row)
+
+    def delete_rows(self, where_col, where_val):
+        rows = self.filter_rows(where_col, where_val)
+        for row in rows:
+        # remove from indexes
+            for col_name, idx in self.indexes.items():
+                val = row[col_name]
+                if val in idx:
+                    del idx[val]
+        # remove from rows
+            self.rows.remove(row)
 
 # ✔ Stores rows in memory
 # ✔ Casts values to correct types
