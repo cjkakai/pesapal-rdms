@@ -72,17 +72,24 @@ class Table:
         result = []
         for row_self in self.rows:
             key = row_self[self_col]
-        # use index on other table if exists
             if other_col in other_table.indexes:
                 other_row_id = other_table.indexes[other_col].get(key)
                 if other_row_id is not None:
                     row_other = other_table.rows[other_row_id]
-                    merged = {**row_self, **row_other}
+                    merged = {}
+                    for k, v in row_self.items():
+                        merged[f"{self.name}.{k}"] = v
+                    for k, v in row_other.items():
+                        merged[f"{other_table.name}.{k}"] = v
                     result.append(merged)
             else:
                 for row_other in other_table.rows:
                     if row_other[other_col] == key:
-                        merged = {**row_self, **row_other}
+                        merged = {}
+                        for k, v in row_self.items():
+                            merged[f"{self.name}.{k}"] = v
+                        for k, v in row_other.items():
+                            merged[f"{other_table.name}.{k}"] = v
                         result.append(merged)
         return result
 

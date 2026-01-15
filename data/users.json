@@ -8,12 +8,6 @@
       "unique": true
     },
     {
-      "name": "email",
-      "dtype": "TEXT",
-      "primary_key": false,
-      "unique": true
-    },
-    {
       "name": "name",
       "dtype": "TEXT",
       "primary_key": false,
@@ -22,17 +16,18 @@
   ],
   "rows": [
     {
+      "id": 1,
+      "name": "Alice"
+    },
+    {
       "id": 2,
-      "email": "b@c.com",
-      "name": "Charlie"
+      "name": "Bob"
     }
   ],
   "indexes": {
     "id": {
+      "1": 0,
       "2": 1
-    },
-    "email": {
-      "b@c.com": 1
     }
   }
 }
