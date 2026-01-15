@@ -1,6 +1,9 @@
 from db.engine import Database
 from db.schema import Column
 
+class SQLError(Exception):
+    pass
+
 db = Database()
 
 print("Pesapal RDBMS — Step 3")
@@ -66,7 +69,10 @@ while True:
         # ---------------- INNER JOIN ----------------
         elif "INNER JOIN" in sql_upper:
             if not sql_upper.startswith("SELECT"):
-                raise ValueError("JOIN must be part of a SELECT statement")
+                raise SQLError("JOIN must be part of a SELECT statement")
+
+            if "FROM" not in sql_upper or "ON" not in sql_upper:
+                raise SQLError("Invalid JOIN syntax")
 
             if "WHERE" in sql_upper:
                 join_part, where_part = sql.split("WHERE", 1)
@@ -97,7 +103,7 @@ while True:
                     col, val = where_part.split("=")
                     op = "="
                 else:
-                    raise ValueError("Unsupported WHERE operator")
+                    raise SQLError("Unsupported WHERE operator")
 
                 col = col.strip()
                 val = val.strip().strip("'")
@@ -132,17 +138,26 @@ while True:
 
         # ---------------- UPDATE ----------------
         elif sql_upper.startswith("UPDATE"):
-            # UPDATE users SET name = 'Bob' WHERE id = 2;
+            if "SET" not in sql_upper or "WHERE" not in sql_upper:
+                raise SQLError("UPDATE requires SET and WHERE clauses")
+
             table = sql.split()[1].lower().strip(" ;")
-            set_part = sql.split("SET")[1].split("WHERE")[0].strip()
-            set_col, set_val = set_part.split("=")
+
+            set_part = sql.split("SET", 1)[1].split("WHERE", 1)[0].strip()
+            if "=" not in set_part:
+                raise SQLError("Invalid SET clause")
+
+            set_col, set_val = set_part.split("=", 1)
             set_col = set_col.strip()
-            set_val = set_val.strip().strip("'").strip(";")
+            set_val = set_val.strip().strip("'")
             if set_val.isdigit():
                 set_val = int(set_val)
 
-            where_part = sql.split("WHERE")[1].strip().rstrip(";")
-            where_col, where_val = where_part.split("=")
+            where_part = sql.split("WHERE", 1)[1].strip().rstrip(";")
+            if "=" not in where_part:
+                raise SQLError("Invalid WHERE clause")
+
+            where_col, where_val = where_part.split("=", 1)
             where_col = where_col.strip()
             where_val = where_val.strip().strip("'")
             if where_val.isdigit():
@@ -153,19 +168,33 @@ while True:
 
         # ---------------- DELETE ----------------
         elif sql_upper.startswith("DELETE"):
-            # DELETE FROM users WHERE id = 2;
-            table = sql.split()[2].lower().strip(" ;")
-            where_part = sql.split("WHERE")[1].strip().rstrip(";")
-            col, val = where_part.split("=")
+            if not sql_upper.startswith("DELETE FROM"):
+                raise SQLError("Invalid DELETE syntax")
+
+            if "WHERE" not in sql_upper:
+                raise SQLError("DELETE requires a WHERE clause")
+
+            parts = sql.split("WHERE", 1)
+            table = parts[0].split()[2].lower().strip(" ;")
+
+            condition = parts[1].strip().rstrip(";")
+            if "=" not in condition:
+                raise SQLError("Only '=' conditions supported in DELETE")
+
+            col, val = condition.split("=", 1)
             col = col.strip()
             val = val.strip().strip("'")
+
             if val.isdigit():
                 val = int(val)
+
             db.delete(table, col, val)
             print("Rows deleted")
         
         else:
             print("Unsupported command")
             
-    except Exception as e:
+    except SQLError as e:
         print("ERROR:", e)
+    except Exception:
+        print("ERROR: Internal database error")
