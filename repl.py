@@ -16,7 +16,7 @@ while True:
 
         # ---------------- CREATE TABLE ----------------
         if sql_upper.startswith("CREATE TABLE"):
-            name = sql.split()[2].lower().strip(";")
+            name = sql.split()[2].lower().strip(" ;")
             body = sql[sql.index("(")+1 : sql.rindex(")")]
             cols = []
 
@@ -33,13 +33,13 @@ while True:
 
         # ---------------- INSERT INTO ----------------
         elif sql_upper.startswith("INSERT INTO"):
-            table = sql.split()[2].lower().strip(";")
+            table = sql.split()[2].lower().strip(" ;")
             values = sql[sql.index("(")+1 : sql.rindex(")")]
             parsed = []
 
             for v in values.split(","):
-                v = v.strip()
-                if v.startswith("'"):
+                v = v.strip().strip(";")
+                if v.startswith("'") and v.endswith("'"):
                     parsed.append(v.strip("'"))
                 elif v.isdigit():
                     parsed.append(int(v))
@@ -53,9 +53,9 @@ while True:
         elif sql_upper.startswith("SELECT"):
             if "WHERE" in sql_upper:
                 # SELECT * FROM users WHERE id = 1;
-                parts = sql_upper.split("WHERE")
-                table = parts[0].split()[-1].lower().strip(";")
-                cond = parts[1].strip()
+                parts = sql.split("WHERE")
+                table = parts[0].split()[-1].lower().strip(" ;")
+                cond = parts[1].strip().rstrip(";")
                 col, val = cond.split("=")
                 col = col.strip()
                 val = val.strip().strip("'")
@@ -63,7 +63,7 @@ while True:
                     val = int(val)
                 rows = db.select_where(table, col, val)
             else:
-                table = sql.split()[-1].lower().strip(";")
+                table = sql.split()[-1].lower().strip(" ;")
                 rows = db.select_all(table)
 
             for r in rows:
@@ -72,15 +72,15 @@ while True:
         # ---------------- UPDATE ----------------
         elif sql_upper.startswith("UPDATE"):
             # UPDATE users SET name = 'Bob' WHERE id = 2;
-            table = sql.split()[1].lower().strip(";")
-            set_part = sql_upper.split("SET")[1].split("WHERE")[0].strip()
+            table = sql.split()[1].lower().strip(" ;")
+            set_part = sql.split("SET")[1].split("WHERE")[0].strip()
             set_col, set_val = set_part.split("=")
             set_col = set_col.strip()
-            set_val = set_val.strip().strip("'")
+            set_val = set_val.strip().strip("'").strip(";")
             if set_val.isdigit():
                 set_val = int(set_val)
 
-            where_part = sql_upper.split("WHERE")[1].strip()
+            where_part = sql.split("WHERE")[1].strip().rstrip(";")
             where_col, where_val = where_part.split("=")
             where_col = where_col.strip()
             where_val = where_val.strip().strip("'")
@@ -93,8 +93,8 @@ while True:
         # ---------------- DELETE ----------------
         elif sql_upper.startswith("DELETE"):
             # DELETE FROM users WHERE id = 2;
-            table = sql.split()[2].lower().strip(";")
-            where_part = sql_upper.split("WHERE")[1].strip()
+            table = sql.split()[2].lower().strip(" ;")
+            where_part = sql.split("WHERE")[1].strip().rstrip(";")
             col, val = where_part.split("=")
             col = col.strip()
             val = val.strip().strip("'")
