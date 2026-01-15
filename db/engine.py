@@ -61,3 +61,17 @@ class Database:
         table1 = self.tables[table1_name]
         table2 = self.tables[table2_name]
         return table1.inner_join(table2, table1_col, table2_col)
+
+    def filter_rows(rows, col, op, val):
+        result = []
+        for r in rows:
+            if col not in r:
+                continue
+            cell = r[col]
+            if op == "=" and cell == val:
+                result.append(r)
+            elif op == ">" and cell > val:
+                result.append(r)
+            elif op == "<" and cell < val:
+                result.append(r)
+        return result
