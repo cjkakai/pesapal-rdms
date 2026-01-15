@@ -33,3 +33,20 @@ class Database:
         if table_name not in self.tables:
             raise ValueError(f"Table '{table_name}' does not exist")
         return self.tables[table_name].rows
+
+    def select_where(self, table_name, col, val):
+        table_name = table_name.lower()
+        table = self.tables[table_name]
+        return table.filter_rows(col, val)
+
+    def update(self, table_name, set_col, set_val, where_col, where_val):
+        table_name = table_name.lower()
+        table = self.tables[table_name]
+        table.update_rows(set_col, set_val, where_col, where_val)
+        save_table(table)
+
+    def delete(self, table_name, where_col, where_val):
+        table_name = table_name.lower()
+        table = self.tables[table_name]
+        table.delete_rows(where_col, where_val)
+        save_table(table)
