@@ -37,6 +37,16 @@ class Table:
 
         for col_name, index in self.indexes.items():
             index[row[col_name]] = row_id
+    
+    def filter_rows(self, col_name, value):
+    # Use index if exists
+        if col_name in self.indexes:
+            row_id = self.indexes[col_name].get(value)
+            if row_id is not None:
+                return [self.rows[row_id]]
+            return []
+    # fallback: scan all rows
+        return [row for row in self.rows if row.get(col_name) == value]
 
 # ✔ Stores rows in memory
 # ✔ Casts values to correct types
