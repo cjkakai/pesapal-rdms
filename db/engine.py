@@ -36,6 +36,8 @@ class Database:
 
     def select_where(self, table_name, col, val):
         table_name = table_name.lower()
+        if table_name not in self.tables:
+            raise ValueError(f"Table '{table_name}' does not exist")
         table = self.tables[table_name]
         return table.filter_rows(col, val)
 

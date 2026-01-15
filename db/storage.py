@@ -55,7 +55,16 @@ def load_tables():
 
         table = Table(data["name"], columns)
         table.rows = data["rows"]
-        table.indexes = data["indexes"]
+        
+        # Fix: Convert index keys back to proper types (JSON converts int keys to strings)
+        table.indexes = {}
+        for col_name, idx in data["indexes"].items():
+            col = next((c for c in columns if c.name == col_name), None)
+            if col and col.dtype == "INT":
+                table.indexes[col_name] = {int(k): v for k, v in idx.items()}
+            else:
+                table.indexes[col_name] = idx
+        
         tables[table.name.lower()] = table
 
     return tables
