@@ -69,6 +69,7 @@ WHERE total > 100;
 - **`db/schema.py`** — Column class with type & constraint metadata
 - **`db/storage.py`** — JSON-based persistence for tables & indexes
 - **`repl.py`** — Interactive shell for SQL commands
+- **`app.py`** — Flask web API demonstrating RDBMS usage
 
 ---
 
@@ -84,24 +85,43 @@ WHERE total > 100;
 
 ## 📦 How to Run
 
-### Clone the repo:
-```bash
-git clone git@github.com:cjkakai/pesapal-rdms.git
-cd pesapal-rdms
-```
-
-### Run the REPL:
+### REPL Mode:
 ```bash
 python repl.py
 ```
 
-### Example session:
+### Web API Mode:
+```bash
+python app.py
+```
+Server runs on http://localhost:5001
+
+### Example REPL session:
 ```
 db> CREATE TABLE users (id INT PRIMARY KEY, name TEXT);
 db> INSERT INTO users VALUES (1, 'Alice');
 db> SELECT * FROM users;
 {'id': 1, 'name': 'Alice'}
 db> EXIT
+```
+
+### Example API usage:
+```bash
+# Get all users
+curl http://localhost:5001/users
+
+# Create a user
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"id":1,"name":"Alice","email":"alice@pesapal.com"}' \
+  http://localhost:5001/users
+
+# Update user
+curl -X PUT -H "Content-Type: application/json" \
+  -d '{"name":"Bob"}' \
+  http://localhost:5001/users/1
+
+# Delete user
+curl -X DELETE http://localhost:5001/users/1
 ```
 
 ---
