@@ -68,6 +68,24 @@ class Table:
         # remove from rows
             self.rows.remove(row)
 
+    def inner_join(self, other_table, self_col, other_col):
+        result = []
+        for row_self in self.rows:
+            key = row_self[self_col]
+        # use index on other table if exists
+            if other_col in other_table.indexes:
+                other_row_id = other_table.indexes[other_col].get(key)
+                if other_row_id is not None:
+                    row_other = other_table.rows[other_row_id]
+                    merged = {**row_self, **row_other}
+                    result.append(merged)
+            else:
+                for row_other in other_table.rows:
+                    if row_other[other_col] == key:
+                        merged = {**row_self, **row_other}
+                        result.append(merged)
+        return result
+
 # ✔ Stores rows in memory
 # ✔ Casts values to correct types
 # ✔ Enforces UNIQUE constraints
