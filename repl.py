@@ -15,7 +15,7 @@ while True:
             break
 
         if sql.upper().startswith("CREATE TABLE"):
-            name = sql.split()[2]
+            name = sql.split()[2].lower().strip(";")
             body = sql[sql.index("(")+1 : sql.rindex(")")]
             cols = []
 
@@ -31,7 +31,7 @@ while True:
             print("Table created")
 
         elif sql.upper().startswith("INSERT INTO"):
-            table = sql.split()[2]
+            table = sql.split()[2].lower().strip(";")
             values = sql[sql.index("(")+1 : sql.rindex(")")]
             parsed = []
 
@@ -46,7 +46,7 @@ while True:
             print("Row inserted")
 
         elif sql.upper().startswith("SELECT"):
-            table = sql.split()[-1]
+            table = sql.split()[-1].lower().strip(";")
             rows = db.select_all(table)
             for r in rows:
                 print(r)

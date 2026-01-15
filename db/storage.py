@@ -56,6 +56,6 @@ def load_tables():
         table = Table(data["name"], columns)
         table.rows = data["rows"]
         table.indexes = data["indexes"]
-        tables[table.name] = table
+        tables[table.name.lower()] = table
 
     return tables
