@@ -102,9 +102,23 @@ while True:
                 val = int(val)
             db.delete(table, col, val)
             print("Rows deleted")
+        
+        elif "INNER JOIN" in sql_upper:
+            parts = sql_upper.split("INNER JOIN")
+            left_table = parts[0].split()[-1].lower().strip(" ;")
+            right_part = parts[1].strip()
+            right_table = right_part.split("ON")[0].strip().lower()
+            on_condition = right_part.split("ON")[1].strip().rstrip(";")
+            left_col, right_col = [x.strip() for x in on_condition.split("=")]
+            left_col = left_col.split(".")[1]  # remove table prefix
+            right_col = right_col.split(".")[1]
 
+            rows = db.inner_join(left_table, right_table, left_col, right_col)
+            for r in rows:
+                print(r)
+        
         else:
             print("Unsupported command")
-
+            
     except Exception as e:
         print("ERROR:", e)
