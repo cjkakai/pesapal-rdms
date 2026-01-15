@@ -52,3 +52,12 @@ class Database:
         table = self.tables[table_name]
         table.delete_rows(where_col, where_val)
         save_table(table)
+
+    def inner_join(self, table1_name, table2_name, table1_col, table2_col):
+        table1_name = table1_name.lower()
+        table2_name = table2_name.lower()
+        if table1_name not in self.tables or table2_name not in self.tables:
+            raise ValueError("One of the tables does not exist")
+        table1 = self.tables[table1_name]
+        table2 = self.tables[table2_name]
+        return table1.inner_join(table2, table1_col, table2_col)
