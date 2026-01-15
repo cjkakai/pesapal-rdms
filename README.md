@@ -51,8 +51,7 @@ DELETE FROM users WHERE id = 2;
 ### JOINs
 ```sql
 SELECT * FROM users
-INNER JOIN orders ON users.id = orders.user_id
-WHERE total > 100;
+INNER JOIN orders ON users.id = orders.user_id WHERE total > 100;
 ```
 
 ### REPL Commands
