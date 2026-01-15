@@ -6,6 +6,20 @@ db = Database()
 print("Pesapal RDBMS — Step 3")
 print("Type EXIT to quit")
 
+def filter_rows(rows, col, op, val):
+    result = []
+    for r in rows:
+        if col not in r:
+            continue
+        cell = r[col]
+        if op == "=" and cell == val:
+            result.append(r)
+        elif op == ">" and cell > val:
+            result.append(r)
+        elif op == "<" and cell < val:
+            result.append(r)
+    return result
+
 while True:
     try:
         sql = input("db> ").strip()
@@ -51,21 +65,50 @@ while True:
 
         # ---------------- INNER JOIN ----------------
         elif "INNER JOIN" in sql_upper:
-            before_join, after_join = sql.split("INNER JOIN", 1)
+            if not sql_upper.startswith("SELECT"):
+                raise ValueError("JOIN must be part of a SELECT statement")
+
+            if "WHERE" in sql_upper:
+                join_part, where_part = sql.split("WHERE", 1)
+                where_part = where_part.strip().rstrip(";")
+            else:
+                join_part = sql
+                where_part = None
+
+            before_join, after_join = join_part.split("INNER JOIN", 1)
             left_table = before_join.split("FROM")[1].strip().lower()
-            
             right_part, on_part = after_join.split("ON", 1)
             right_table = right_part.strip().lower()
-            
             on_part = on_part.strip().rstrip(";")
             left_expr, right_expr = on_part.split("=")
-            
             left_col = left_expr.split(".")[1].strip()
             right_col = right_expr.split(".")[1].strip()
-            
+
             rows = db.inner_join(left_table, right_table, left_col, right_col)
+
+            if where_part:
+                if ">" in where_part:
+                    col, val = where_part.split(">")
+                    op = ">"
+                elif "<" in where_part:
+                    col, val = where_part.split("<")
+                    op = "<"
+                elif "=" in where_part:
+                    col, val = where_part.split("=")
+                    op = "="
+                else:
+                    raise ValueError("Unsupported WHERE operator")
+
+                col = col.strip()
+                val = val.strip().strip("'")
+                if val.isdigit():
+                    val = int(val)
+
+                rows = filter_rows(rows, col, op, val)
+
             for r in rows:
                 print(r)
+
 
         # ---------------- SELECT ----------------
         elif sql_upper.startswith("SELECT"):
